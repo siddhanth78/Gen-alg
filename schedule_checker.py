@@ -104,8 +104,8 @@ class Event():
             cost += (hrs - DESIRED_HRS)**2 + 5
 
         for re in RESTRICTIONS[self.day]:
-            if self.start in re:
-                cost += 500
+            if self.start in re or self.end in re:
+                cost += 10000
                 break
 
         if self.start >= self.end:
