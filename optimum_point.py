@@ -6,6 +6,8 @@ POINTS_POP = 100
 
 ALL_POINTS = []
 
+EPOCHS = 15000
+
 gens = []
 
 for x in range(200):
@@ -74,7 +76,7 @@ while True:
     
     sorted_pool = sorted(point_pool, key=lambda p: p.fitness)
 
-    if gen == 10000:
+    if gen == EPOCHS:
         break
 
     next_pool = []
@@ -94,9 +96,9 @@ while True:
     if gen//100 == 0:
         gens.append((point_pool[0].x, point_pool[0].y))
 
-    print(f"Generation: {gen}\Fitness: {point_pool[0].fitness}\nString: {point_pool[0].x}, {point_pool[0].y}")
+    print(f"Generation: {gen}\nFitness: {point_pool[0].fitness}\nPoint: ({point_pool[0].x}, {point_pool[0].y})")
 
-print(f"Generation: {gen}\Fitness: {sorted_pool[0].fitness}\nString: {sorted_pool[0].x}, {sorted_pool[0].y}")
+print(f"Generation: {gen}\nFitness: {sorted_pool[0].fitness}\nPoint: ({sorted_pool[0].x}, {sorted_pool[0].y})")
 
 xs = []
 ys = []
