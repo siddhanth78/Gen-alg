@@ -73,6 +73,6 @@ while True:
 
     generation += 1
 
-    print(f"Generation: {generation}\Fitness: {pool[0].fitness}\nString: {pool[0].chromosome}")
+    print(f"Generation: {generation}\nFitness: {pool[0].fitness}\nString: {pool[0].chromosome}")
 
-print(f"Generation: {generation}\Fitness: {sorted_pool[0].fitness}\nString: {sorted_pool[0].chromosome}")
+print(f"Generation: {generation}\nFitness: {sorted_pool[0].fitness}\nString: {sorted_pool[0].chromosome}")
