@@ -7,28 +7,63 @@ POSSIBLE_DAYS = ['Su', 'M', 'T', 'W', 'Th', 'F', 'Sa']
 
 # Sample restrictions
 
-RESTRICTED_TIMES = POSSIBLE_TIMES[:8]
+RESTRICTED_TIMES = [6.0, 6.25, 6.5, 6.75, 7.0, 7.25, 7.5, 7.75]
 
-MW_RESTRICTIONS = POSSIBLE_TIMES[16:24]
-MW_RESTRICTIONS.extend(POSSIBLE_TIMES[32:40])
-MW_RESTRICTIONS.extend(RESTRICTED_TIMES)
+SU_RESTRICTIONS = []
+M_RESTRICTIONS = []
+T_RESTRICTIONS = []
+W_RESTRICTIONS= []
+TH_RESTRICTIONS = []
+F_RESTRICTIONS = []
+SA_RESTRICTIONS = []
 
-TT_RESTRICTIONS = POSSIBLE_TIMES[24:32]
-TT_RESTRICTIONS.extend(POSSIBLE_TIMES[40:48])
-TT_RESTRICTIONS.extend(RESTRICTED_TIMES)
+MW_CLASS_1 = [12.0, 12.25, 12.5, 12.75, 13.0, 13.25, 13.5, 13.75]
+MW_CLASS_2 = [16.0, 16.25, 16.5, 16.75, 17.0, 17.25, 17.5, 17.75]
+
+M_TUTORING = [18.0, 18.25, 18.5, 18.75]
+
+TT_CLASS_1 = [10.0, 10.25, 10.5, 10.75, 11.0, 11.25, 11.5, 11.75]
+TT_CLASS_2 = [14.0, 14.25, 14.5, 14.75, 15.0, 15.25, 15.5, 15.75]
+
+TH_CLUB = [18.0, 18.25, 18.5, 18.75, 19.0, 19.25, 19.5]
+
+SU_RESTRICTIONS.append(RESTRICTED_TIMES)
+
+M_RESTRICTIONS.append(RESTRICTED_TIMES)
+M_RESTRICTIONS.append(MW_CLASS_1)
+M_RESTRICTIONS.append(MW_CLASS_2)
+M_RESTRICTIONS.append(M_TUTORING)
+
+T_RESTRICTIONS.append(RESTRICTED_TIMES)
+T_RESTRICTIONS.append(TT_CLASS_1)
+T_RESTRICTIONS.append(TT_CLASS_2)
+
+W_RESTRICTIONS.append(RESTRICTED_TIMES)
+W_RESTRICTIONS.append(MW_CLASS_1)
+W_RESTRICTIONS.append(MW_CLASS_2)
+
+TH_RESTRICTIONS.append(RESTRICTED_TIMES)
+TH_RESTRICTIONS.append(TT_CLASS_1)
+TH_RESTRICTIONS.append(TT_CLASS_2)
+TH_RESTRICTIONS.append(TH_CLUB)
+
+F_RESTRICTIONS.append(RESTRICTED_TIMES)
+
+SA_RESTRICTIONS.append(RESTRICTED_TIMES)
 
 RESTRICTIONS = {
-    'Su': RESTRICTED_TIMES,
-    'M': MW_RESTRICTIONS,
-    'T': TT_RESTRICTIONS,
-    'W': MW_RESTRICTIONS,
-    'Th': TT_RESTRICTIONS,
-    'F': RESTRICTED_TIMES,
-    'Sa': RESTRICTED_TIMES
+    'Su': SU_RESTRICTIONS,
+    'M': M_RESTRICTIONS,
+    'T': T_RESTRICTIONS,
+    'W': W_RESTRICTIONS,
+    'Th': TH_RESTRICTIONS,
+    'F': F_RESTRICTIONS,
+    'Sa': SA_RESTRICTIONS
 }
 
 DESIRED_HRS = int(input("Desired number of hours: "))
 DESIRED_DAY = input("Desired day: ")
+NEXT_BEST_DAY = input("Next best day: ")
 DESIRED_START = float(input("Desired start time: "))
 
 MAX_EPOCHS = 1000
@@ -49,8 +84,16 @@ class Event():
         global DESIRED_DAY
         global DESIRED_START
         global POSSIBLE_TIMES
+        global NEXT_BEST_DAY
 
         cost = 0
+
+        if self.day != DESIRED_DAY:
+            cost += ((POSSIBLE_DAYS.index(self.day) - POSSIBLE_DAYS.index(DESIRED_DAY))**2)*10
+            if self.day == NEXT_BEST_DAY:
+                cost = 5
+            else:
+                cost += ((POSSIBLE_DAYS.index(self.day) - POSSIBLE_DAYS.index(NEXT_BEST_DAY))**2)*10
 
         if self.start != DESIRED_START:
             cost += (self.start - DESIRED_START)**2 + 5
@@ -60,13 +103,12 @@ class Event():
         if hrs != DESIRED_HRS:
             cost += (hrs - DESIRED_HRS)**2 + 5
 
-        if self.day != DESIRED_DAY:
-            cost += (POSSIBLE_DAYS.index(self.day) - POSSIBLE_DAYS.index(DESIRED_DAY))**2
+        for re in RESTRICTIONS[self.day]:
+            if self.start in re:
+                cost += 500
+                break
 
-        if self.start in RESTRICTIONS[self.day]:
-            cost += 30
-
-        if self.start == self.end:
+        if self.start >= self.end:
             cost += 20
 
         return cost
@@ -123,26 +165,24 @@ while True:
 
     print(f"Generation: {gen}\nCost: {event_pool[0].cost}\n")
 
-name = "Lunch"
-
-ddrs = []
-bdrs = []
-
 bd = sorted_event_pool[0].day
 
-for ddr, bdr in zip(sorted(RESTRICTIONS[DESIRED_DAY]), sorted(RESTRICTIONS[sorted_event_pool[0].day])):
-    ddr, bdr = str(ddr), str(bdr)
-    timing_d, timing_b = ddr.split('.'), bdr.split('.')
-    h_d, h_b = timing_d[0], timing_b[0]
-    m_d, m_b = timing_d[1].replace('0', '00'), timing_b[1].replace('0', '00')
-    m_d, m_b = m_d.replace('5', '30'), m_b.replace('5', '30')
-    m_d, m_b = m_d.replace('230', '15'), m_b.replace('230', '15')
-    m_d, m_b = m_d.replace('730', '45'), m_b.replace('730', '45')
-    ddrs.append(f"{h_d}:{m_d}")
-    bdrs.append(f"{h_b}:{m_b}")
+bdtimings = []
 
-ddrstr = '\n'.join(d for d in ddrs)
-bdrstr = '\n'.join(b for b in bdrs)
+for r in RESTRICTIONS[sorted_event_pool[0].day]:
+    bdrs = []
+    for bdr in sorted(r):
+        bdr = str(bdr)
+        timing_b = bdr.split('.')
+        h_b = timing_b[0]
+        m_b = timing_b[1].replace('0', '00')
+        m_b = m_b.replace('5', '30')
+        m_b = m_b.replace('230', '15')
+        m_b = m_b.replace('730', '45')
+        bdrs.append(f"{h_b}:{m_b}")
+    bdrstr = '\n'.join(b for b in bdrs)
+    bdtimings.append(bdrstr+'\n')
+
 
 st, e = str(sorted_event_pool[0].start), str(sorted_event_pool[0].end)
 timing_st, timing_e = st.split('.'), e.split('.')
@@ -154,9 +194,9 @@ m_s, m_e = m_s.replace('730', '45'), m_e.replace('730', '45')
 stt = f"{h_s}:{m_s}"
 edt = f"{h_e}:{m_e}"
 
-print(f"Desired day [{DESIRED_DAY}] restrictions:\n{ddrstr}\n")
+bdall = '\n'.join(b for b in bdtimings)
 
-print(f"Best day [{bd}] restrictions:\n{bdrstr}\n")
+print(f"Best day [{bd}] restrictions:\n{bdall}\n")
 
-print(f"""Name: {name}\nBest day: {bd}
+print(f"""Best day: {bd}
 Best time: {stt} to {edt}""")
