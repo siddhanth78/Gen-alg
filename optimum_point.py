@@ -255,8 +255,8 @@ cities = [
     ("Winnipeg", -97.12, 49.90)
 ]
 
-POINTS_POP = 100
-EPOCHS = 5000
+POINTS_POP = 200
+EPOCHS = 1000
 
 ALL_POINTS = [(city[1], city[2]) for city in cities]
 
@@ -312,21 +312,25 @@ class Point():
 
     @staticmethod
     def crossover(parent1, parent2):
-        if random.random() < 0.5:
+        global cities
+        prob = random.random()
+        if prob < 0.4:
             return Point(parent1.city)
-        else:
+        elif 0.4 <= prob < 0.8:
             return Point(parent2.city)
+        else:
+            return Point(random.choice(cities))
 
 point_pool = [Point(random.choice(cities)) for _ in range(POINTS_POP)]
 gens = [point_pool[0]]
 
 for gen in range(EPOCHS):
     sorted_pool = sorted(point_pool, key=lambda p: p.fitness)
-    next_pool = sorted_pool[:10]
+    next_pool = sorted_pool[:20]
 
-    for _ in range(90):
-        parent_set_1 = random.choice(sorted_pool[:50])
-        parent_set_2 = random.choice(sorted_pool[:50])
+    for _ in range(180):
+        parent_set_1 = random.choice(sorted_pool[:100])
+        parent_set_2 = random.choice(sorted_pool[:100])
         child_p = Point.crossover(parent_set_1, parent_set_2)
         next_pool.append(child_p)
 
