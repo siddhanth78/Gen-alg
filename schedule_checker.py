@@ -66,7 +66,7 @@ DESIRED_DAY = input("Desired day: ")
 NEXT_BEST_DAY = input("Next best day: ")
 DESIRED_START = float(input("Desired start time: "))
 
-MAX_EPOCHS = 1000
+MAX_EPOCHS = 3000
 
 class Event():
 
@@ -90,26 +90,33 @@ class Event():
 
         if self.day != DESIRED_DAY:
             cost += ((POSSIBLE_DAYS.index(self.day) - POSSIBLE_DAYS.index(DESIRED_DAY))**2)*10
-            if self.day == NEXT_BEST_DAY:
-                cost = 5
-            else:
-                cost += ((POSSIBLE_DAYS.index(self.day) - POSSIBLE_DAYS.index(NEXT_BEST_DAY))**2)*10
+            if self.day != NEXT_BEST_DAY:
+                cost += ((POSSIBLE_DAYS.index(self.day) - POSSIBLE_DAYS.index(NEXT_BEST_DAY))**2)*5
+            elif self.day == NEXT_BEST_DAY:
+                cost = -5
+        elif self.day == DESIRED_DAY:
+            cost = -10
 
         if self.start != DESIRED_START:
-            cost += (self.start - DESIRED_START)**2 + 5
+            cost += ((self.start - DESIRED_START)**2)*10 + 5
+
+        time_range = [i/100 for i in range(int(self.start*100), int(self.end*100+25), 25)]
 
         hrs = self.end - self.start
 
         if hrs != DESIRED_HRS:
-            cost += (hrs - DESIRED_HRS)**2 + 5
+            cost += ((hrs - DESIRED_HRS)**2)*100 + 5
+
+        if hrs > DESIRED_HRS:
+            cost += ((hrs - DESIRED_HRS)**2)*1000 + 5
 
         for re in RESTRICTIONS[self.day]:
-            if self.start in re or self.end in re:
-                cost += 10000
-                break
+            for tr in time_range:
+                if tr in re:
+                    cost += 500
 
         if self.start >= self.end:
-            cost += 20
+            cost += 500
 
         return cost
     
