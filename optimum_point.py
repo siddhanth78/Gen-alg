@@ -6,15 +6,15 @@ POINTS_POP = 100
 
 ALL_POINTS = []
 
-EPOCHS = 15000
+EPOCHS = 10000
 
 gens = []
 
-for x in range(200):
-    for y in range(200):
+for x in range(-180, 181):
+    for y in range(-90, 91):
         ALL_POINTS.append((x,y))
 
-CURR_POINTS = [random.choice(ALL_POINTS) for _ in range(4)]
+CURR_POINTS = [(77,12), (0, 51), (-104, 39)]
 
 class Point():
 
