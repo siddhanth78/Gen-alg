@@ -256,15 +256,13 @@ cities = [
 ]
 
 POINTS_POP = 100
-EPOCHS = 10000
+EPOCHS = 5000
 
 ALL_POINTS = [(city[1], city[2]) for city in cities]
 
-
-# Function to find the closest city to a given point
 def find_closest_city(x, y, cities):
     closest_city = min(cities, key=lambda city: (city[1] - x)**2 + (city[2] - y)**2)
-    return closest_city[0]
+    return closest_city
 
 def find_city_coordinates(city_name, cities):
     for name, x, y in cities:
@@ -285,9 +283,9 @@ def get_user_input_cities():
         if city.lower() == 'list':
             print("\n".join(sorted(city[0] for city in cities)))
             continue
-        coords = find_city_coordinates(city, cities)
-        if coords:
-            chosen_cities.append((city, coords))
+        city_info = find_city_coordinates(city, cities)
+        if city_info:
+            chosen_cities.append((city, city_info))
         else:
             print(f"City '{city}' not found. Please try again.")
     return chosen_cities
@@ -298,59 +296,48 @@ user_chosen_cities = get_user_input_cities()
 # Set CURR_POINTS based on user input
 CURR_POINTS = [coords for _, coords in user_chosen_cities]
 
-# Find the names of the chosen cities
-chosen_cities = [find_closest_city(x, y, cities) for x, y in CURR_POINTS]
-
 class Point():
-    def __init__(self, x, y):
+    def __init__(self, city):
         global CURR_POINTS
-        self.x = x
-        self.y = y
+        self.city = city
+        self.x = city[1]
+        self.y = city[2]
         self.fitness = self.calculate_fitness(CURR_POINTS)
 
     def calculate_fitness(self, points):
         return sum(self.get_distance(point[0], point[1]) for point in points)
-    
+
     def get_distance(self, x2, y2):
         return ((x2 - self.x)**2 + (y2 - self.y)**2)
-    
-    def crossover(self, other):
-        global ALL_POINTS
-        prob = random.random()
-        
-        if prob < 0.45:
-            x, y = self.x, other.y
-        elif 0.45 <= prob < 0.8:
-            x, y = other.x, self.y
+
+    @staticmethod
+    def crossover(parent1, parent2):
+        if random.random() < 0.5:
+            return Point(parent1.city)
         else:
-            x, y = random.choice(ALL_POINTS)
+            return Point(parent2.city)
 
-        return Point(x, y)
-
-point_pool = [Point(p[0], p[1]) for p in random.choices(ALL_POINTS, k=POINTS_POP)]
+point_pool = [Point(random.choice(cities)) for _ in range(POINTS_POP)]
 gens = [point_pool[0]]
 
 for gen in range(EPOCHS):
     sorted_pool = sorted(point_pool, key=lambda p: p.fitness)
     next_pool = sorted_pool[:10]
-    
+
     for _ in range(90):
         parent_set_1 = random.choice(sorted_pool[:50])
         parent_set_2 = random.choice(sorted_pool[:50])
-        child_p = parent_set_1.crossover(parent_set_2)
+        child_p = Point.crossover(parent_set_1, parent_set_2)
         next_pool.append(child_p)
 
     point_pool = next_pool
 
     if gen % 100 == 0:
         gens.append(sorted_pool[0])
-    
-    print(f"Generation: {gen+1}\nFitness: {sorted_pool[0].fitness}\nPoint: ({sorted_pool[0].x}, {sorted_pool[0].y})")
 
-print(f"Final Generation: {EPOCHS}\nFitness: {sorted_pool[0].fitness}\nPoint: ({sorted_pool[0].x}, {sorted_pool[0].y})")
+    print(f"Generation: {gen+1}\nFitness: {sorted_pool[0].fitness}\nCity: {sorted_pool[0].city[0]}")
 
-# Find the name of the city closest to the final point
-final_city = find_closest_city(sorted_pool[0].x, sorted_pool[0].y, cities)
+print(f"Final Generation: {EPOCHS}\nFitness: {sorted_pool[0].fitness}\nCity: {sorted_pool[0].city[0]}")
 
 # Plotting
 plt.figure(figsize=(20, 12))
@@ -364,28 +351,19 @@ selected_x, selected_y = zip(*CURR_POINTS)
 plt.scatter(selected_x, selected_y, color='green', s=50, label='Selected Points')
 
 # Label selected points
-for i, (x, y) in enumerate(CURR_POINTS):
-    plt.annotate(chosen_cities[i], (x, y), xytext=(5, 5), textcoords='offset points')
-
-# Plot changes and draw orange lines
-gen_x = [p.x for p in gens]
-gen_y = [p.y for p in gens]
-plt.scatter(gen_x[1:-1], gen_y[1:-1], color='orange', s=50, label='Intermediate Points')
-
-# Draw orange lines from green points to orange points
-for i, (x, y) in enumerate(zip(gen_x[1:-1], gen_y[1:-1])):
-    for sx, sy in CURR_POINTS:
-        plt.plot([sx, x], [sy, y], color='orange', alpha=0.7, linewidth=0.5)
+for city, (x, y) in user_chosen_cities:
+    plt.annotate(city, (x, y), xytext=(5, 5), textcoords='offset points')
 
 # Plot final point and draw red lines
-plt.scatter(gens[-1].x, gens[-1].y, color='red', s=50, label='Final Point')
+final_point = gens[-1]
+plt.scatter(final_point.x, final_point.y, color='red', s=50, label='Final Point')
 
 # Label final point
-plt.annotate(final_city, (gens[-1].x, gens[-1].y), xytext=(5, 5), textcoords='offset points')
+plt.annotate(final_point.city[0], (final_point.x, final_point.y), xytext=(5, 5), textcoords='offset points')
 
 # Draw red lines from green points to the final red point
 for sx, sy in CURR_POINTS:
-    plt.plot([sx, gens[-1].x], [sy, gens[-1].y], color='red', linewidth=1.5)
+    plt.plot([sx, final_point.x], [sy, final_point.y], color='red', linewidth=1.5)
 
 plt.title('World Cities with Genetic Algorithm Results', fontsize=20)
 plt.xlabel('Longitude', fontsize=14)
@@ -399,9 +377,9 @@ plt.legend()
 
 # Add text box with information
 info_text = f"Selected Cities:\n"
-for city in chosen_cities:
+for city, _ in user_chosen_cities:
     info_text += f"• {city}\n"
-info_text += f"\nFinal Closest City:\n• {final_city}"
+info_text += f"\nFinal City:\n• {final_point.city[0]}"
 
 plt.text(0.02, 0.02, info_text, transform=plt.gca().transAxes, fontsize=12,
          verticalalignment='bottom', bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.8))
