@@ -61,7 +61,7 @@ RESTRICTIONS = {
     'Sa': SA_RESTRICTIONS
 }
 
-DESIRED_HRS = int(input("Desired number of hours: "))
+DESIRED_HRS = float(input("Desired number of hours: "))
 DESIRED_DAY = input("Desired day: ")
 NEXT_BEST_DAY = input("Next best day: ")
 DESIRED_START = float(input("Desired start time: "))
