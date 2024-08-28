@@ -6,11 +6,11 @@ from collections import defaultdict
 
 PLANES = [
 
-    ("P1", 16000, 1000, 8),
+    ("P1", 15000, 1000, 8),
     ("P2", 20000, 1200, 10),
     ("P3", 15000, 1500, 12),
     ("P4", 17000, 2000, 18),
-    ("P5", 8000, 900, 10)
+    ("P5", 8000, 900, 8)
 
 ]
 
@@ -39,8 +39,10 @@ PORTS = [
 
 ]
 
-POP_SIZE = 300
-EPOCHS = 50000
+POP_SIZE = 500
+EPOCHS = 30000
+SINGLE_TRIP_BUDGET = 28000
+INORDER = False
 
 class Flight():
 
@@ -63,12 +65,21 @@ class Flight():
 
         global REFUEL
         global PORTS
+        global INORDER
 
         cost = self.plane_rent
 
         final_path = []
 
         currx, curry = self.depart_x, self.depart_y
+
+        if INORDER == False:
+            if random.random() < 0.55:
+                path_ = self.path[1:len(self.path)-1]
+                random.shuffle(path_)
+                path_.append(self.path[-1])
+                path_.insert(0, self.path[0])
+                self.path = path_
         
         for p in self.path:
 
@@ -88,7 +99,7 @@ class Flight():
 
                     prob = random.random()
 
-                    if prob < 0.5:
+                    if prob < 0.8:
 
                         refuel_point = random.choice(REFUEL)
                         stopn, stopx, stopy, refuel_cost = refuel_point[0], refuel_point[1], refuel_point[2], refuel_point[3]
@@ -166,13 +177,20 @@ class Flight():
         return int(((point_1[0] - point_2[0])**2 + (point_1[1] - point_2[1])**2)**0.5)
     
 
-path = [PORTS[0], PORTS[1],
-        PORTS[7], PORTS[4],
-        PORTS[3], PORTS[5],
-        PORTS[2], PORTS[8],
-        PORTS[4], PORTS[6],
-        PORTS[5], PORTS[1],
-        PORTS[8], PORTS[0]]
+path = [PORTS[0], PORTS[6],
+        PORTS[1], PORTS[5],
+        PORTS[4], PORTS[9],
+        PORTS[2], PORTS[3],
+        PORTS[4], PORTS[1],
+        PORTS[7], PORTS[8],
+        PORTS[6], PORTS[3],
+        PORTS[2], PORTS[0]]
+
+if INORDER == False:
+    path_ = list(set(path[1:len(path)-1]))
+    path_.append(path[-1])
+    path_.insert(0, path[0])
+    path = path_
 
 
 all_flights = []
@@ -187,15 +205,15 @@ while True:
 
     sorted_flights = sorted(all_flights, key=lambda x: x.cost)
 
-    if gen == EPOCHS:
+    if gen == EPOCHS or sorted_flights[0].cost < SINGLE_TRIP_BUDGET:
         break
 
-    next_flights = sorted_flights[:30]
+    next_flights = sorted_flights[:50]
 
-    for i in range(270):
+    for i in range(450):
 
-        f1 = random.choice(sorted_flights[:150])
-        f2 = random.choice(sorted_flights[:150])
+        f1 = random.choice(sorted_flights[:250])
+        f2 = random.choice(sorted_flights[:250])
 
         newf = f1.crossover(f2)
 
@@ -242,9 +260,9 @@ for i, stop in enumerate(path[1:], start=1):  # Start from 1 for the second stop
     visit_orders[stop].append(str(i))
 
 # Draw arrows and label stops
-for i in range(len(path) - 1):
-    start = get_coordinates(path[i])
-    end = get_coordinates(path[i+1])
+for i in range(len(sorted_flights[0].final) - 1):
+    start = get_coordinates(sorted_flights[0].final[i])
+    end = get_coordinates(sorted_flights[0].final[i+1])
     
     if start and end:
         arrow = FancyArrowPatch(
