@@ -41,8 +41,8 @@ PORTS = [
 
 POP_SIZE = 500
 EPOCHS = 30000
-SINGLE_TRIP_BUDGET = 28000
-INORDER = False
+SINGLE_TRIP_BUDGET = 62000
+INORDER = True
 
 class Flight():
 
@@ -178,13 +178,11 @@ class Flight():
     
 
 path = [PORTS[0], PORTS[6],
-        PORTS[1], PORTS[5],
-        PORTS[4], PORTS[9],
-        PORTS[2], PORTS[3],
-        PORTS[4], PORTS[1],
-        PORTS[7], PORTS[8],
-        PORTS[6], PORTS[3],
-        PORTS[2], PORTS[0]]
+        PORTS[1], PORTS[3],
+        PORTS[7], PORTS[1],
+        PORTS[9], PORTS[4],
+        PORTS[8], PORTS[3],
+        PORTS[0]]
 
 if INORDER == False:
     path_ = list(set(path[1:len(path)-1]))
@@ -222,8 +220,9 @@ while True:
     all_flights = next_flights
 
     gen += 1
-
-    print(f"Generation: {gen}\nCost: {all_flights[0].cost}\nPlane: {all_flights[0].plane}")
+    
+    if gen%500 == 0:
+        print(f"Generation: {gen}\nCost: {all_flights[0].cost}\nPlane: {all_flights[0].plane}")
 
 
 def get_coordinates(stop_name):
