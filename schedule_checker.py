@@ -169,8 +169,9 @@ while True:
     event_pool = new_event_pool
 
     gen += 1
-
-    print(f"Generation: {gen}\nCost: {event_pool[0].cost}\n")
+    
+    if gen%500 == 0:
+        print(f"Generation: {gen}\nCost: {event_pool[0].cost}\n")
 
 bd = sorted_event_pool[0].day
 
