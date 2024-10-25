@@ -235,15 +235,12 @@ def update(frame):
         line.set_data(generations, best_costs)
         cost_text.set_text(f'Generation: {gen}\nBest Cost: {all_flights[0].cost:.2f}')
 
-        # Update the flight path plot
         ax2.clear()
         plot_flight_path(ax2, all_flights[0])
 
-        # Adjust the x-axis limit if needed
         if gen > ax1.get_xlim()[1]:
             ax1.set_xlim(0, gen * 1.1)
 
-        # Adjust the y-axis limit if needed
         if all_flights[0].cost < ax1.get_ylim()[0] or all_flights[0].cost > ax1.get_ylim()[1]:
             ax1.set_ylim(min(best_costs) * 0.9, max(best_costs) * 1.1)
 
