@@ -39,6 +39,7 @@ EPOCHS = 10000
 SINGLE_TRIP_BUDGET = 80000
 INORDER = True
 
+
 class Flight:
     def __init__(self, depart, path, plane):
         self.depart = depart
@@ -51,7 +52,7 @@ class Flight:
         self.plane_totalfuel = plane[2]
         self.plane_currfuel = self.plane_totalfuel
         self.plane_fuel_per_m = plane[3]
-        
+
         self.cost, self.final = self.getCost()
 
     def getCost(self):
@@ -169,6 +170,7 @@ class Flight:
             ((point_1[0] - point_2[0]) ** 2 + (point_1[1] - point_2[1]) ** 2) ** 0.5
         )
 
+
 path = [
     PORTS[0],
     PORTS[6],
@@ -192,26 +194,30 @@ if INORDER == False:
     path_.insert(0, path[0])
     path = path_
 
+
 def get_coordinates(stop_name):
     for stop in PORTS + REFUEL:
         if stop[0] == stop_name:
             return stop[1], stop[2]
     return None
 
+
 best_costs = []
 generations = []
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
-line, = ax1.plot([], [], lw=2)
-cost_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+(line,) = ax1.plot([], [], lw=2)
+cost_text = ax1.text(0.02, 0.95, "", transform=ax1.transAxes)
+
 
 def init():
     ax1.set_xlim(0, EPOCHS)
     ax1.set_ylim(0, SINGLE_TRIP_BUDGET * 1.1)
-    ax1.set_xlabel('Generation')
-    ax1.set_ylabel('Best Cost')
-    ax1.set_title('Optimization Progress')
+    ax1.set_xlabel("Generation")
+    ax1.set_ylabel("Best Cost")
+    ax1.set_title("Optimization Progress")
     return line, cost_text
+
 
 def update(frame):
     global all_flights, gen
@@ -233,7 +239,7 @@ def update(frame):
         generations.append(gen)
 
         line.set_data(generations, best_costs)
-        cost_text.set_text(f'Generation: {gen}\nBest Cost: {all_flights[0].cost:.2f}')
+        cost_text.set_text(f"Generation: {gen}\nBest Cost: {all_flights[0].cost:.2f}")
 
         ax2.clear()
         plot_flight_path(ax2, all_flights[0])
@@ -241,10 +247,14 @@ def update(frame):
         if gen > ax1.get_xlim()[1]:
             ax1.set_xlim(0, gen * 1.1)
 
-        if all_flights[0].cost < ax1.get_ylim()[0] or all_flights[0].cost > ax1.get_ylim()[1]:
+        if (
+            all_flights[0].cost < ax1.get_ylim()[0]
+            or all_flights[0].cost > ax1.get_ylim()[1]
+        ):
             ax1.set_ylim(min(best_costs) * 0.9, max(best_costs) * 1.1)
 
     return line, cost_text, ax2
+
 
 def plot_flight_path(ax, best_flight):
     global PORTS, REFUEL
@@ -304,10 +314,13 @@ def plot_flight_path(ax, best_flight):
     ax.legend(["Ports", "Refuel Stations"])
     ax.grid(True)
 
+
 all_flights = [Flight(path[0], path, random.choice(PLANES)) for _ in range(POP_SIZE)]
 gen = 0
 
-ani = FuncAnimation(fig, update, frames=EPOCHS, init_func=init, interval=1, repeat=False)
+ani = FuncAnimation(
+    fig, update, frames=EPOCHS, init_func=init, interval=1, repeat=False
+)
 
 plt.tight_layout()
 plt.show()
