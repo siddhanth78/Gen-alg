@@ -1,6 +1,6 @@
 import random
 
-POP_SIZE = 200
+POP_SIZE = 1000
 
 POSSIBLE_TIMES = [i/60 for i in range(360, 1431, 15)]
 POSSIBLE_DAYS = ['Su', 'M', 'T', 'W', 'Th', 'F', 'Sa']
@@ -55,14 +55,24 @@ DESIRED_START = float(input("Desired start time: "))
 
 MAX_EPOCHS = 3000
 
+MEMO = {}
+
 class Event():
 
     def __init__(self, day, start, end):
-
+        
+        global MEMO
+        
         self.day = day
         self.start = start
         self.end = end
-        self.cost = self.get_cost()
+        
+        if (self.day, self.start, self.end) not in MEMO:
+            MEMO[(self.day, self.start, self.end)] = self.get_cost()
+        
+        self.cost = MEMO[(self.day, self.start, self.end)]
+        
+        #self.cost = self.get_cost()
 
     def get_cost(self):
 

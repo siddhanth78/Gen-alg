@@ -333,3 +333,4 @@ print(f"Path to take:\n\n{' -> '.join(sf for sf in best_flight.final)}\n")
 print(f"Fuel left: {best_flight.plane_currfuel}/{best_flight.plane_totalfuel}")
 print(f"Budget: {SINGLE_TRIP_BUDGET}")
 print(f"Final Cost: {best_flight.cost}\n")
+

@@ -6,19 +6,29 @@ GENES = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !@#$%^
 
 POPULATION = 100
 
+costs = {}
+
+memo = {}
+
 class Individual():
 
     def __init__(self, chromosome):
 
         self.chromosome = chromosome
+        
         self.fitness = self.calc_fitness()
 
     def calc_fitness(self):
-        global TARGET
+        global TARGET, costs
         fitness = 0
+        
+        if self.chromosome in costs:
+            return costs[self.chromosome]
+            
         for i in range(len(self.chromosome)):
             if self.chromosome[i] != TARGET[i]:
                 fitness += 1
+        costs[self.chromosome] = fitness
         
         return fitness
     
@@ -72,7 +82,9 @@ while True:
     pool = next_pool
 
     generation += 1
+    
+    if generation % 500 == 0:
 
-    print(f"Generation: {generation}\nFitness: {pool[0].fitness}\nString: {pool[0].chromosome}")
+        print(f"Generation: {generation}\nFitness: {pool[0].fitness}\nString: {pool[0].chromosome}")
 
 print(f"Generation: {generation}\nFitness: {sorted_pool[0].fitness}\nString: {sorted_pool[0].chromosome}")

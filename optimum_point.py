@@ -296,13 +296,19 @@ user_chosen_cities = get_user_input_cities()
 # Set CURR_POINTS based on user input
 CURR_POINTS = [coords for _, coords in user_chosen_cities]
 
+memo = {}
+
 class Point():
     def __init__(self, city):
-        global CURR_POINTS
+        global CURR_POINTS, memo
         self.city = city
         self.x = city[1]
         self.y = city[2]
-        self.fitness = self.calculate_fitness(CURR_POINTS)
+        
+        if city not in memo:
+            memo[self.city] = self.calculate_fitness(CURR_POINTS)
+        
+        self.fitness = memo[self.city]
 
     def calculate_fitness(self, points):
         return sum(self.get_distance(point[0], point[1]) for point in points)
@@ -339,7 +345,7 @@ for gen in range(EPOCHS):
     if gen % 100 == 0:
         gens.append(sorted_pool[0])
 
-    print(f"Generation: {gen+1}\nFitness: {sorted_pool[0].fitness}\nCity: {sorted_pool[0].city[0]}")
+        print(f"Generation: {gen+1}\nFitness: {sorted_pool[0].fitness}\nCity: {sorted_pool[0].city[0]}")
 
 print(f"Final Generation: {EPOCHS}\nFitness: {sorted_pool[0].fitness}\nCity: {sorted_pool[0].city[0]}")
 
