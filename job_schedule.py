@@ -30,7 +30,7 @@ def get_cost(machines, max_deadline, min_duration):
     # Cost factors
     gap_penalty_factor = 10
     makespan_factor = 5
-    priority_factor = 15  # Weight for priority-based penalties
+    priority_factor = 15
     
     max_makespan = 0
 
